@@ -1,0 +1,128 @@
+Claro! Abaixo está um exemplo de README para o projeto.
+
+---
+
+# RentService API
+
+## Descrição
+
+A RentService é uma API REST desenvolvida em Java com Spring Boot para gerenciar as locações de carros de uma locadora. A API permite cadastrar, consultar e cancelar locações, além de garantir que um cliente não possa ter mais de uma locação ativa ao mesmo tempo e que a data inicial da locação não ultrapasse a data final.
+
+## Funcionalidades
+
+- Cadastrar locação
+- Consultar locação por ID
+- Listar todas as locações
+- Cancelar locação
+
+## Tecnologias Utilizadas
+
+- Java 21.0.03
+- Spring Boot
+- Spring Data JPA
+- Hibernate
+- MySQL
+- Docker
+- Swagger
+- JUnit
+
+## Estrutura do Projeto
+
+- `src/main/java/io/github/robsonfe/rentservice/model`: Contém as classes de modelo `Cliente` e `Locacao`.
+- `src/main/java/io/github/robsonfe/rentservice/repository`: Contém as interfaces de repositório `ClienteRepository` e `LocacaoRepository`.
+- `src/main/java/io/github/robsonfe/rentservice/service`: Contém a classe de serviço `GerenciadorLocacoes`.
+- `src/main/java/io/github/robsonfe/rentservice/controller`: Contém a classe do controlador REST `LocadoraController`.
+- `src/main/java/io/github/robsonfe/rentservice/config`: Contém a configuração do Swagger `SwaggerConfig`.
+
+## Configuração do Ambiente
+
+### Pré-requisitos
+
+- Java 21
+- Docker
+- Docker Compose
+- Maven
+
+### Passos para Configuração
+
+1. Clone o repositório:
+
+   ```bash
+   git clone https://github.com/seu-usuario/rentservice.git
+   cd rentservice
+   ```
+
+2. Configure as propriedades do banco de dados no arquivo `application.properties`:
+
+   ```properties
+    spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+    spring.datasource.url=jdbc:mysql://localhost:3306/rentdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo
+    spring.datasource.username=root
+    spring.datasource.password=edna
+   ```
+
+3. Build o projeto:
+
+   ```bash
+   ./mvnw clean package
+   ```
+
+4. Suba os containers Docker:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+5. Acesse a API via Swagger para testar os endpoints:
+
+   ```
+   http://localhost:8080/swagger-ui.html
+   ```
+
+## Endpoints da API
+
+- **GET /locacoes**: Lista todas as locações.
+- **POST /locacoes**: Cadastra uma nova locação.
+  - Parâmetros: `clienteId`, `dataInicial`, `dataFinal`
+- **GET /locacoes/{id}**: Consulta uma locação por ID.
+- **DELETE /locacoes/{id}**: Cancela uma locação por ID.
+
+## Exemplo de Uso
+
+### Cadastrar uma Locação
+
+```sh
+curl -X POST "http://localhost:8080/locacoes" -d "clienteId=1&dataInicial=2023-06-01T10:00:00&dataFinal=2023-06-05T10:00:00"
+```
+
+### Consultar uma Locação
+
+```sh
+curl -X GET "http://localhost:8080/locacoes/1"
+```
+
+### Listar Todas as Locações
+
+```sh
+curl -X GET "http://localhost:8080/locacoes"
+```
+
+### Cancelar uma Locação
+
+```sh
+curl -X DELETE "http://localhost:8080/locacoes/1"
+```
+
+## Testes
+
+Para executar os testes, utilize o comando:
+
+```bash
+./mvnw test
+```
+
+## Autor
+
+- [Robson Ferreira](https://github.com/RobsonFe)
+
+---
