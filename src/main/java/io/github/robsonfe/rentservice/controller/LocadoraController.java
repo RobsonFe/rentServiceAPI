@@ -17,15 +17,6 @@ public class LocadoraController {
     @Autowired
     private GerenciadorLocacoes gerenciadorLocacoes;
 
-    @GetMapping
-    public List<Locacao> listarLocacoes(){
-        return gerenciadorLocacoes.listarLocacoes();
-    }
-
-    @GetMapping("buscar/nome")
-    public List<Cliente> buscarPorNome(@RequestParam String nome){
-        return  gerenciadorLocacoes.buscarPorNome(nome);
-    }
 
     @PostMapping
     public ResponseEntity<Locacao> cadastrarLocacao(
@@ -43,6 +34,11 @@ public class LocadoraController {
 
     }
 
+    @GetMapping
+    public List<Locacao> listarLocacoes(){
+        return gerenciadorLocacoes.listarLocacoes();
+    }
+
     @GetMapping("consultar/{id}")
     public ResponseEntity<Locacao> consultarLocacao(@PathVariable Long id){
         try {
@@ -51,6 +47,11 @@ public class LocadoraController {
         } catch (IllegalArgumentException e){
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("buscar/nome")
+    public List<Cliente> buscarPorNome(@RequestParam String nome){
+        return  gerenciadorLocacoes.buscarPorNome(nome);
     }
 
     @DeleteMapping("cancelar/{id}")

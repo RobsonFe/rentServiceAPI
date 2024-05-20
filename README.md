@@ -75,40 +75,6 @@ A RentService é uma API REST desenvolvida em Java com Spring Boot para gerencia
    http://localhost:8080/swagger-ui.html
    ```
 
-## Endpoints da API
-
-- **GET /locacoes**: Lista todas as locações.
-- **POST /locacoes**: Cadastra uma nova locação.
-  - Parâmetros: `clienteId`, `dataInicial`, `dataFinal`
-- **GET /locacoes/{id}**: Consulta uma locação por ID.
-- **DELETE /locacoes/{id}**: Cancela uma locação por ID.
-
-## Exemplo de Uso
-
-### Cadastrar uma Locação
-
-```sh
-curl -X POST "http://localhost:8080/locacoes" -d "clienteId=1&dataInicial=2023-06-01T10:00:00&dataFinal=2023-06-05T10:00:00"
-```
-
-### Consultar uma Locação
-
-```sh
-curl -X GET "http://localhost:8080/locacoes/1"
-```
-
-### Listar Todas as Locações
-
-```sh
-curl -X GET "http://localhost:8080/locacoes"
-```
-
-### Cancelar uma Locação
-
-```sh
-curl -X DELETE "http://localhost:8080/locacoes/1"
-```
-
 ## Testes
 
 Para executar os testes, utilize o comando:
