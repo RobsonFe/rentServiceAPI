@@ -1,7 +1,3 @@
-Claro! Abaixo está um exemplo de README para o projeto.
-
----
-
 # RentService API
 
 ## Descrição
