@@ -18,12 +18,6 @@ public class Locacao implements Serializable {
     @Column(name = "id_locacao")
     private Long id;
 
-    @Column(name = "username", nullable = false, unique = true, length = 100)
-    private String username;
-
-    @Column(name = "password", nullable = false, length = 100)
-    private String password;
-
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
@@ -51,7 +45,7 @@ public class Locacao implements Serializable {
     public String toString() {
         return "Locacao{" +
                 "id=" + id +
-                ", cliente=" + cliente.getClass().getName() +
+                ", cliente=" + cliente.getName() +
                 ", dataInicial=" + dataInicial +
                 ", dataFinal=" + dataFinal +
                 '}';
