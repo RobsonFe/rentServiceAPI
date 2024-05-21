@@ -73,12 +73,10 @@ public class GerenciadorLocacoes {
     }
 
     @Transactional(readOnly = true)
-    public List<Cliente> buscarPorNome(String nome, int page, int size) {
+    public List<Cliente> buscarPorNome(String nome) {
         String jpql = "SELECT c FROM Cliente c WHERE c.name LIKE :nome";
         TypedQuery<Cliente> query = entityManager.createQuery(jpql, Cliente.class);
         query.setParameter("nome", "%" + nome + "%");
-        query.setFirstResult(page * size);
-        query.setMaxResults(size);
         return query.getResultList();
     }
 }
