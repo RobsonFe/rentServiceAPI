@@ -12,12 +12,28 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
   app:
     build: .
     container_name: rentservice
     ports:
       - "8080:8080"
     depends_on:
+      - mysql
+      - rabbitmq
+
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.consumer
+    container_name: consumer
+    depends_on:
+      - rabbitmq
       - mysql
 
 volumes:

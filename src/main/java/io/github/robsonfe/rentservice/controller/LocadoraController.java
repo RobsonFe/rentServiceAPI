@@ -2,7 +2,10 @@ package io.github.robsonfe.rentservice.controller;
 
 import io.github.robsonfe.rentservice.model.Cliente;
 import io.github.robsonfe.rentservice.model.Locacao;
+import io.github.robsonfe.rentservice.repository.ClienteRepository;
+import io.github.robsonfe.rentservice.repository.LocacaoRepository;
 import io.github.robsonfe.rentservice.service.GerenciadorLocacoes;
+import io.github.robsonfe.rentservice.service.RabbitMQSender;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Tag(name = "Locação", description = "Contém todos os recursos referentes ao registro de locação.")
@@ -22,6 +26,15 @@ public class LocadoraController {
 
     @Autowired
     private GerenciadorLocacoes gerenciadorLocacoes;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
+
+    @Autowired
+    private LocacaoRepository locacaoRepository;
+
+    @Autowired
+    private RabbitMQSender rabbitMQSender;
 
     @Operation(summary = "Cadastrar uma Locação",
             description = "Você cadastra uma locação com data inicial e data final dessa locação",
@@ -127,4 +140,18 @@ public class LocadoraController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // RabbitMQ
+
+    @PostMapping("/calcular-dias-restantes")
+    public void calcularDiasRestantes() {
+        List<Locacao> locacoes = locacaoRepository.findAll();
+        for (Locacao locacao : locacoes) {
+            LocalDateTime now = LocalDateTime.now();
+            long diasRestantes = ChronoUnit.DAYS.between(now, locacao.getDataFinal());
+            Cliente cliente = locacao.getCliente();
+            rabbitMQSender.send("locacaoQueue", cliente, diasRestantes);
+        }
+    }
+
 }
