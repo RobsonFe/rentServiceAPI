@@ -1,4 +1,8 @@
-# RentService API
+# Teste Técnico Full Stack Spring Boot
+
+- Teste Ténico para a empresa Flowing
+- Projeto Full Stack com Spring Boot + Angular 
+- Autor: Robson Ferreira
 
 ## Descrição
 
@@ -20,7 +24,27 @@ A RentService é uma API REST desenvolvida em Java com Spring Boot para gerencia
 - MySQL
 - Docker
 - Swagger
+- OpenAPI
 - JUnit
+- RabbitMQ
+
+# Documentação 
+- [Documentação do Projeto](https://docs.google.com/document/d/1TDdKUlNRj9m_nURjmPE4De3XRjnuBY-6BG_L7rO2Of8/edit?usp=sharing)
+- [Java SE](https://docs.oracle.com/en/java/)
+- [Intellij IDEA](https://www.jetbrains.com/idea/)
+- [Spring Boot](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/)
+- [JDK 21](https://docs.oracle.com/en/java/javase/21/)
+- [MySQL](https://dev.mysql.com/doc/)
+- [Docker](https://www.docker.com/)
+- [Swagger](https://swagger.io/)
+- [OpenAPI](https://springdoc.org/)
+- [JUnit](https://junit.org/junit5/)
+- [RabbitMQ](https://www.rabbitmq.com/)
+
+# Orientações sobre o teste
+
+## Baixe as orientações 
+- [Link para baixar as instruções](https://drive.google.com/file/d/1eauvYGpxh5Y45gToOZQT3HkDxKTgD-vG/view?usp=drive_link)
 
 ## Estrutura do Projeto
 
@@ -69,10 +93,10 @@ A RentService é uma API REST desenvolvida em Java com Spring Boot para gerencia
    docker-compose up --build
    ```
 
-5. Acesse a API via Swagger para testar os endpoints:
+5. Acesse a API via Swagger para testar os endpoints e documentação do projeto:
 
    ```
-   http://localhost:8080/swagger-ui.html
+   http://localhost:8080/swagger-ui/index.html
    ```
 
 ## Testes
