@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Tag(name = "Locação", description = "Contém todos os recursos referentes ao registro de locação")
+@Tag(name = "Locação", description = "Contém todos os recursos referentes ao registro de locação.")
 @RestController
 @RequestMapping("api/v1/locacoes")
 public class LocadoraController {
