@@ -1,5 +1,6 @@
 package io.github.robsonfe.rentservice.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,9 +24,11 @@ public class Locacao implements Serializable {
     private Cliente cliente;
 
     @Column(name = "data_inicial", nullable = false)
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDateTime dataInicial;
 
     @Column(name = "data_final", nullable = false)
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDateTime dataFinal;
 
     @Override

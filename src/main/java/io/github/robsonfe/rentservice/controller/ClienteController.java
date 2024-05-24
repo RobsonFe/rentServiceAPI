@@ -39,7 +39,7 @@ public class ClienteController {
                                     implementation = Error.class
                             )))
             })
-    @PostMapping
+    @PostMapping("/cadastrar")
     public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente cliente) {
         cliente.setLocacaoStatus(Cliente.LocacaoStatus.SEM_LOCACAO);
         Cliente novoCliente = clienteRepository.save(cliente);
