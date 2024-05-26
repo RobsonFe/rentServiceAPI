@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Getter @Setter @NoArgsConstructor
@@ -25,11 +25,11 @@ public class Locacao implements Serializable {
 
     @Column(name = "data_inicial", nullable = false)
     @JsonFormat(pattern = "dd/MM/yyyy")
-    private LocalDateTime dataInicial;
+    private LocalDate dataInicial;
 
     @Column(name = "data_final", nullable = false)
     @JsonFormat(pattern = "dd/MM/yyyy")
-    private LocalDateTime dataFinal;
+    private LocalDate dataFinal;
 
     @Column(name = "veiculos", length = 100, nullable = false)
     private String veiculo;

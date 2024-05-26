@@ -56,8 +56,8 @@ public class LocacaoService {
         locacao.setTipoVeiculo(form.getTipoVeiculo());
 
         cliente.getLocacoes().add(locacao);
-
-        return locacaoRepository.save(locacao);
+        locacao = locacaoRepository.save(locacao);
+        return locacao;
     }
     @Transactional
     public Locacao consultarLocacao(Long id) {

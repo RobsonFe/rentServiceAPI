@@ -75,7 +75,7 @@ public class LocadoraController {
                                     implementation = Error.class
                             )))
             })
-    @GetMapping("listar")
+    @GetMapping("/listar")
     public List<Locacao> listarLocacoes(){
         return locacaoService.listarLocacoes();
     }
@@ -92,7 +92,7 @@ public class LocadoraController {
                                     implementation = Error.class
                             )))
             })
-    @GetMapping("consultar/{id}")
+    @GetMapping("/consultar/{id}")
     public ResponseEntity<Locacao> consultarLocacao(@PathVariable Long id){
         try {
             Locacao locacao = locacaoService.consultarLocacao(id);
@@ -114,7 +114,7 @@ public class LocadoraController {
                                     implementation = Error.class
                             )))
             })
-    @GetMapping("buscar/nome")
+    @GetMapping("/buscar/nome")
     public List<Cliente> buscarPorNome(@RequestParam String nome){
         return  locacaoService.buscarPorNome(nome);
     }
@@ -125,7 +125,7 @@ public class LocadoraController {
                     @ApiResponse(responseCode = "200", description = "Locação cancelada com sucesso!"),
                     @ApiResponse(responseCode = "404", description = "Locação não encontrada")
             })
-    @DeleteMapping("cancelar/{id}")
+    @DeleteMapping("/cancelar/{id}")
     public ResponseEntity<Void> cancelarLocacao(@PathVariable Long id){
 
         try {
