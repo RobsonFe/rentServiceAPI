@@ -30,7 +30,7 @@ public class Cliente implements Serializable {
     @Column(name = "locacao_status", nullable = false, length = 50)
     private LocacaoStatus locacaoStatus;
 
-    @OneToMany(mappedBy = "tb_cliente", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Locacao> locacoes = new ArrayList<>();
 
     public enum LocacaoStatus {

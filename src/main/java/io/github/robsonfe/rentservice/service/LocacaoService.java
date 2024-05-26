@@ -43,6 +43,7 @@ public class LocacaoService {
             cliente = new Cliente();
             cliente.setName(form.getNomeCliente());
             cliente.setLocacaoStatus(form.getLocacaoStatus());
+            cliente = clienteRepository.save(cliente);
         }
 
         Locacao locacao = new Locacao();
