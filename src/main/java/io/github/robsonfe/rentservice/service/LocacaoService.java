@@ -2,6 +2,7 @@ package io.github.robsonfe.rentservice.service;
 
 import io.github.robsonfe.rentservice.model.Cliente;
 import io.github.robsonfe.rentservice.model.Locacao;
+import io.github.robsonfe.rentservice.model.LocacaoForm;
 import io.github.robsonfe.rentservice.repository.ClienteRepository;
 import io.github.robsonfe.rentservice.repository.LocacaoRepository;
 import jakarta.persistence.EntityManager;
@@ -10,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class GerenciadorLocacoes {
+public class LocacaoService {
 
     @Autowired
     private LocacaoRepository locacaoRepository;
@@ -28,31 +29,34 @@ public class GerenciadorLocacoes {
     public List<Locacao> listarLocacoes(){
         return locacaoRepository.findAll();
     }
+
+
     @Transactional
-    public Locacao cadastrarLocacao(Long clienteId, LocalDateTime dataInicial, LocalDateTime dataFinal){
-        Cliente cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
+    public Locacao cadastrarLocacao(LocacaoForm form){
 
-        if(cliente.getLocacaoStatus() == Cliente.LocacaoStatus.TEM_LOCACAO){
-            throw new IllegalArgumentException("O cliente já possui locação!");
-        }
+        Optional<Cliente> clientes = clienteRepository.findByName(form.getNomeCliente());
+                Cliente cliente;
 
-        if(dataInicial.isAfter(dataFinal)){
-            throw new IllegalArgumentException("A data inicial não pode ser após a data final");
+        if(clientes.isPresent()){
+            cliente = clientes.get();
+        } else {
+            cliente = new Cliente();
+            cliente.setName(form.getNomeCliente());
+            cliente.setLocacaoStatus(form.getLocacaoStatus());
         }
 
         Locacao locacao = new Locacao();
 
         locacao.setCliente(cliente);
-        locacao.setDataInicial(dataInicial);
-        locacao.setDataFinal(dataFinal);
+        locacao.setDataInicial(form.getDataInicial());
+        locacao.setDataFinal(form.getDataFinal());
+        locacao.setVeiculo(form.getVeiculo());
+        locacao.setDescricao(form.getDescricao());
+        locacao.setTipoVeiculo(form.getTipoVeiculo());
 
-        cliente.setLocacaoStatus(Cliente.LocacaoStatus.TEM_LOCACAO);
+        cliente.getLocacoes().add(locacao);
 
-        locacaoRepository.save(locacao);
-        clienteRepository.save(cliente);
-
-        return locacao;
+        return locacaoRepository.save(locacao);
     }
     @Transactional
     public Locacao consultarLocacao(Long id) {
@@ -61,12 +65,29 @@ public class GerenciadorLocacoes {
     }
 
     @Transactional
+    public Locacao atualizar(Long id, LocacaoForm form){
+        Optional<Locacao> locacoes = locacaoRepository.findById(id);
+
+        if(locacoes.isPresent()){
+            Locacao locacao = locacoes.get();
+            locacao.setDataInicial(form.getDataInicial());
+            locacao.setDataFinal(form.getDataFinal());
+            locacao.setVeiculo(form.getVeiculo());
+            locacao.setDescricao(form.getDescricao());
+            locacao.setTipoVeiculo(form.getTipoVeiculo());
+
+            return locacaoRepository.save(locacao);
+        }
+
+        throw new IllegalArgumentException("Locação não encontrada para atualizar!");
+    }
+
+    @Transactional
     public void cancelarLocacao(Long id) {
         Locacao locacao = locacaoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Locação não encontrada"));
 
         Cliente cliente = locacao.getCliente();
-        cliente.setLocacaoStatus(Cliente.LocacaoStatus.SEM_LOCACAO);
 
         locacaoRepository.delete(locacao);
         clienteRepository.save(cliente);

@@ -12,7 +12,6 @@ import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-class GerenciadorLocacoesTest {
+class LocacaoServiceTest {
 
     @Mock
     private LocacaoRepository locacaoRepository;
@@ -33,7 +32,7 @@ class GerenciadorLocacoesTest {
     private EntityManager entityManager;
 
     @InjectMocks
-    private GerenciadorLocacoes gerenciadorLocacoes;
+    private LocacaoService locacaoService;
 
     @BeforeEach
     void setUp() {
@@ -45,7 +44,7 @@ class GerenciadorLocacoesTest {
         Locacao locacao = new Locacao();
         when(locacaoRepository.findAll()).thenReturn(Collections.singletonList(locacao));
 
-        assertEquals(1, gerenciadorLocacoes.listarLocacoes().size());
+        assertEquals(1, locacaoService.listarLocacoes().size());
         verify(locacaoRepository, times(1)).findAll();
     }
 
@@ -59,7 +58,7 @@ class GerenciadorLocacoesTest {
         when(locacaoRepository.save(any(Locacao.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(clienteRepository.save(any(Cliente.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Locacao locacao = gerenciadorLocacoes.cadastrarLocacao(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        Locacao locacao = locacaoService.cadastrarLocacao(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
 
         assertNotNull(locacao);
         assertEquals(cliente, locacao.getCliente());
@@ -71,7 +70,7 @@ class GerenciadorLocacoesTest {
         when(clienteRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () ->
-                gerenciadorLocacoes.cadastrarLocacao(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1))
+                locacaoService.cadastrarLocacao(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1))
         );
     }
 
@@ -84,7 +83,7 @@ class GerenciadorLocacoesTest {
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
 
         assertThrows(IllegalArgumentException.class, () ->
-                gerenciadorLocacoes.cadastrarLocacao(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1))
+                locacaoService.cadastrarLocacao(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1))
         );
     }
 
@@ -97,7 +96,7 @@ class GerenciadorLocacoesTest {
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
 
         assertThrows(IllegalArgumentException.class, () ->
-                gerenciadorLocacoes.cadastrarLocacao(1L, LocalDateTime.now().plusDays(1), LocalDateTime.now())
+                locacaoService.cadastrarLocacao(1L, LocalDateTime.now().plusDays(1), LocalDateTime.now())
         );
     }
 
@@ -108,7 +107,7 @@ class GerenciadorLocacoesTest {
 
         when(locacaoRepository.findById(1L)).thenReturn(Optional.of(locacao));
 
-        Locacao result = gerenciadorLocacoes.consultarLocacao(1L);
+        Locacao result = locacaoService.consultarLocacao(1L);
 
         assertNotNull(result);
         assertEquals(locacao, result);
@@ -118,7 +117,7 @@ class GerenciadorLocacoesTest {
     void testConsultarLocacaoNaoEncontrada() {
         when(locacaoRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> gerenciadorLocacoes.consultarLocacao(1L));
+        assertThrows(IllegalArgumentException.class, () -> locacaoService.consultarLocacao(1L));
     }
 
     @Test
@@ -131,7 +130,7 @@ class GerenciadorLocacoesTest {
 
         when(locacaoRepository.findById(1L)).thenReturn(Optional.of(locacao));
 
-        gerenciadorLocacoes.cancelarLocacao(1L);
+        locacaoService.cancelarLocacao(1L);
 
         assertEquals(Cliente.LocacaoStatus.SEM_LOCACAO, cliente.getLocacaoStatus());
         verify(locacaoRepository, times(1)).delete(locacao);
@@ -142,7 +141,7 @@ class GerenciadorLocacoesTest {
     void testCancelarLocacaoNaoEncontrada() {
         when(locacaoRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> gerenciadorLocacoes.cancelarLocacao(1L));
+        assertThrows(IllegalArgumentException.class, () -> locacaoService.cancelarLocacao(1L));
     }
 
     @Test
@@ -155,7 +154,7 @@ class GerenciadorLocacoesTest {
         when(query.setParameter(anyString(), anyString())).thenReturn(query);
         when(query.getResultList()).thenReturn(Collections.singletonList(cliente));
 
-        List<Cliente> result = gerenciadorLocacoes.buscarPorNome("Test");
+        List<Cliente> result = locacaoService.buscarPorNome("Test");
 
         assertEquals(1, result.size());
         assertEquals(cliente.getName(), result.get(0).getName());

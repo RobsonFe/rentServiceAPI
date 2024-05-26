@@ -4,7 +4,7 @@ import io.github.robsonfe.rentservice.model.Cliente;
 import io.github.robsonfe.rentservice.model.Locacao;
 import io.github.robsonfe.rentservice.repository.ClienteRepository;
 import io.github.robsonfe.rentservice.repository.LocacaoRepository;
-import io.github.robsonfe.rentservice.service.GerenciadorLocacoes;
+import io.github.robsonfe.rentservice.service.LocacaoService;
 import io.github.robsonfe.rentservice.service.RabbitMQSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class LocadoraControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private GerenciadorLocacoes gerenciadorLocacoes;
+    private LocacaoService locacaoService;
 
     @MockBean
     private ClienteRepository clienteRepository;
@@ -61,7 +61,7 @@ class LocadoraControllerTest {
 
     @Test
     void testCadastrarLocacao() throws Exception {
-        when(gerenciadorLocacoes.cadastrarLocacao(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(locacao);
+        when(locacaoService.cadastrarLocacao(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(locacao);
 
         mockMvc.perform(post("/api/v1/locacoes")
                         .param("clienteId", "1")
@@ -72,12 +72,12 @@ class LocadoraControllerTest {
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.cliente.name", is("Teste Cliente")));
 
-        verify(gerenciadorLocacoes, times(1)).cadastrarLocacao(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class));
+        verify(locacaoService, times(1)).cadastrarLocacao(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class));
     }
 
     @Test
     void testCadastrarLocacaoBadRequest() throws Exception {
-        when(gerenciadorLocacoes.cadastrarLocacao(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(locacaoService.cadastrarLocacao(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenThrow(new IllegalArgumentException("A data inicial não pode ser após a data final"));
 
         mockMvc.perform(post("/api/v1/locacoes")
@@ -87,12 +87,12 @@ class LocadoraControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
-        verify(gerenciadorLocacoes, times(1)).cadastrarLocacao(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class));
+        verify(locacaoService, times(1)).cadastrarLocacao(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class));
     }
 
     @Test
     void testListarLocacoes() throws Exception {
-        when(gerenciadorLocacoes.listarLocacoes()).thenReturn(Collections.singletonList(locacao));
+        when(locacaoService.listarLocacoes()).thenReturn(Collections.singletonList(locacao));
 
         mockMvc.perform(get("/api/v1/locacoes")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -100,12 +100,12 @@ class LocadoraControllerTest {
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[0].cliente.name", is("Teste Cliente")));
 
-        verify(gerenciadorLocacoes, times(1)).listarLocacoes();
+        verify(locacaoService, times(1)).listarLocacoes();
     }
 
     @Test
     void testConsultarLocacao() throws Exception {
-        when(gerenciadorLocacoes.consultarLocacao(anyLong())).thenReturn(locacao);
+        when(locacaoService.consultarLocacao(anyLong())).thenReturn(locacao);
 
         mockMvc.perform(get("/api/v1/locacoes/consultar/1")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -113,23 +113,23 @@ class LocadoraControllerTest {
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.cliente.name", is("Teste Cliente")));
 
-        verify(gerenciadorLocacoes, times(1)).consultarLocacao(anyLong());
+        verify(locacaoService, times(1)).consultarLocacao(anyLong());
     }
 
     @Test
     void testConsultarLocacaoNotFound() throws Exception {
-        when(gerenciadorLocacoes.consultarLocacao(anyLong())).thenThrow(new IllegalArgumentException("Locação não encontrada"));
+        when(locacaoService.consultarLocacao(anyLong())).thenThrow(new IllegalArgumentException("Locação não encontrada"));
 
         mockMvc.perform(get("/api/v1/locacoes/consultar/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
-        verify(gerenciadorLocacoes, times(1)).consultarLocacao(anyLong());
+        verify(locacaoService, times(1)).consultarLocacao(anyLong());
     }
 
     @Test
     void testBuscarPorNome() throws Exception {
-        when(gerenciadorLocacoes.buscarPorNome(anyString())).thenReturn(Collections.singletonList(cliente));
+        when(locacaoService.buscarPorNome(anyString())).thenReturn(Collections.singletonList(cliente));
 
         mockMvc.perform(get("/api/v1/locacoes/buscar/nome")
                         .param("nome", "Teste Cliente")
@@ -137,29 +137,29 @@ class LocadoraControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name", is("Teste Cliente")));
 
-        verify(gerenciadorLocacoes, times(1)).buscarPorNome(anyString());
+        verify(locacaoService, times(1)).buscarPorNome(anyString());
     }
 
     @Test
     void testCancelarLocacao() throws Exception {
-        doNothing().when(gerenciadorLocacoes).cancelarLocacao(anyLong());
+        doNothing().when(locacaoService).cancelarLocacao(anyLong());
 
         mockMvc.perform(delete("/api/v1/locacoes/cancelar/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        verify(gerenciadorLocacoes, times(1)).cancelarLocacao(anyLong());
+        verify(locacaoService, times(1)).cancelarLocacao(anyLong());
     }
 
     @Test
     void testCancelarLocacaoNotFound() throws Exception {
-        doThrow(new IllegalArgumentException("Locação não encontrada")).when(gerenciadorLocacoes).cancelarLocacao(anyLong());
+        doThrow(new IllegalArgumentException("Locação não encontrada")).when(locacaoService).cancelarLocacao(anyLong());
 
         mockMvc.perform(delete("/api/v1/locacoes/cancelar/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
-        verify(gerenciadorLocacoes, times(1)).cancelarLocacao(anyLong());
+        verify(locacaoService, times(1)).cancelarLocacao(anyLong());
     }
 
     @Test

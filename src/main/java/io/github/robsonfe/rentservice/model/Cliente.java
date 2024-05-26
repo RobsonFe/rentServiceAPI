@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -25,8 +27,11 @@ public class Cliente implements Serializable {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "locacao_status", nullable = false, length = 30)
-    private LocacaoStatus locacaoStatus = LocacaoStatus.SEM_LOCACAO;
+    @Column(name = "locacao_status", nullable = false, length = 50)
+    private LocacaoStatus locacaoStatus;
+
+    @OneToMany(mappedBy = "tb_cliente", cascade = CascadeType.ALL)
+    private List<Locacao> locacoes = new ArrayList<>();
 
     public enum LocacaoStatus {
         TEM_LOCACAO, SEM_LOCACAO

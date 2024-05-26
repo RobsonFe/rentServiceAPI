@@ -2,15 +2,17 @@ package io.github.robsonfe.rentservice.controller;
 
 import io.github.robsonfe.rentservice.model.Cliente;
 import io.github.robsonfe.rentservice.model.Locacao;
+import io.github.robsonfe.rentservice.model.LocacaoForm;
 import io.github.robsonfe.rentservice.repository.ClienteRepository;
 import io.github.robsonfe.rentservice.repository.LocacaoRepository;
-import io.github.robsonfe.rentservice.service.GerenciadorLocacoes;
+import io.github.robsonfe.rentservice.service.LocacaoService;
 import io.github.robsonfe.rentservice.service.RabbitMQSender;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +27,7 @@ import java.util.List;
 public class LocadoraController {
 
     @Autowired
-    private GerenciadorLocacoes gerenciadorLocacoes;
+    private LocacaoService locacaoService;
 
     @Autowired
     private ClienteRepository clienteRepository;
@@ -48,22 +50,15 @@ public class LocadoraController {
                                     implementation = Error.class
                             )))
             })
-    @PostMapping
-    public ResponseEntity<Locacao> cadastrarLocacao(
-            @RequestParam Long clienteId,
-            @RequestParam LocalDateTime dataInicial,
-            @RequestParam LocalDateTime dataFinal
-    ){
-
-       try {
-           Locacao locacao = gerenciadorLocacoes.cadastrarLocacao(clienteId,dataInicial,dataFinal);
-           return ResponseEntity.ok(locacao);
-       }catch (IllegalArgumentException e){
-           return ResponseEntity.badRequest().body(null);
-       }
-
+    @PostMapping("/cadastrar")
+    public ResponseEntity<Locacao> cadastrarLocacao(@Valid @RequestBody LocacaoForm locacaoForm) {
+        try {
+            Locacao locacao = locacaoService.cadastrarLocacao(locacaoForm);
+            return ResponseEntity.ok(locacao);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
-
     @Operation(summary = "Listar Todas as Locações",
             description = "Listagem de todas as locações",
             responses = {
@@ -80,9 +75,9 @@ public class LocadoraController {
                                     implementation = Error.class
                             )))
             })
-    @GetMapping
+    @GetMapping("listar")
     public List<Locacao> listarLocacoes(){
-        return gerenciadorLocacoes.listarLocacoes();
+        return locacaoService.listarLocacoes();
     }
 
     @Operation(summary = "Consultar Locação",
@@ -100,7 +95,7 @@ public class LocadoraController {
     @GetMapping("consultar/{id}")
     public ResponseEntity<Locacao> consultarLocacao(@PathVariable Long id){
         try {
-            Locacao locacao = gerenciadorLocacoes.consultarLocacao(id);
+            Locacao locacao = locacaoService.consultarLocacao(id);
             return ResponseEntity.ok(locacao);
         } catch (IllegalArgumentException e){
             return ResponseEntity.notFound().build();
@@ -121,7 +116,7 @@ public class LocadoraController {
             })
     @GetMapping("buscar/nome")
     public List<Cliente> buscarPorNome(@RequestParam String nome){
-        return  gerenciadorLocacoes.buscarPorNome(nome);
+        return  locacaoService.buscarPorNome(nome);
     }
 
     @Operation(summary = "Cancelar Locação",
@@ -134,7 +129,7 @@ public class LocadoraController {
     public ResponseEntity<Void> cancelarLocacao(@PathVariable Long id){
 
         try {
-            gerenciadorLocacoes.cancelarLocacao(id);
+            locacaoService.cancelarLocacao(id);
             return ResponseEntity.ok().build();
         }catch (IllegalArgumentException e){
             return ResponseEntity.notFound().build();

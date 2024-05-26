@@ -20,7 +20,7 @@ public class Locacao implements Serializable {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "cliente_id", nullable = false)
+    @JoinColumn(name = "id_cliente")
     private Cliente cliente;
 
     @Column(name = "data_inicial", nullable = false)
@@ -30,6 +30,21 @@ public class Locacao implements Serializable {
     @Column(name = "data_final", nullable = false)
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDateTime dataFinal;
+
+    @Column(name = "veiculos", length = 100, nullable = false)
+    private String veiculo;
+
+    @Column(name = "descricao")
+    private String descricao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_veiculo", nullable = false , length = 50)
+    private tipoVeiculo tipoVeiculo;
+
+    public enum tipoVeiculo{
+        MOTO,
+        CARRO
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -48,9 +63,12 @@ public class Locacao implements Serializable {
     public String toString() {
         return "Locacao{" +
                 "id=" + id +
-                ", cliente=" + cliente.getName() +
+                ", cliente=" + (cliente != null ? cliente.getName() : null) +
                 ", dataInicial=" + dataInicial +
                 ", dataFinal=" + dataFinal +
+                ", veiculo='" + veiculo + '\'' +
+                ", descricao='" + descricao + '\'' +
+                ", tipoVeiculo=" + tipoVeiculo +
                 '}';
     }
 }
