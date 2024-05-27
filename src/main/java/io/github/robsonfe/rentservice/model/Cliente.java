@@ -1,5 +1,6 @@
 package io.github.robsonfe.rentservice.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -32,7 +33,8 @@ public class Cliente implements Serializable {
     @Column(name = "locacao_status", nullable = false, length = 50)
     private LocacaoStatus locacaoStatus;
 
-    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Locacao> locacoes = new ArrayList<>();
 
     public enum LocacaoStatus {

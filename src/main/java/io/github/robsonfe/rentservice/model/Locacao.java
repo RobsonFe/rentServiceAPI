@@ -1,5 +1,6 @@
 package io.github.robsonfe.rentservice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,8 +24,9 @@ public class Locacao implements Serializable {
     @Column(name = "id_locacao")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cliente")
+    @JsonBackReference
     private Cliente cliente;
 
     @Column(name = "data_inicial", nullable = false)

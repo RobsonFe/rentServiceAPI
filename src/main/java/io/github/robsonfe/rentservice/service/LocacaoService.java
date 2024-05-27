@@ -40,18 +40,20 @@ public class LocacaoService {
         cliente = clienteRepository.save(cliente);
 
         Locacao locacao = new Locacao();
-
         locacao.setDataInicial(form.getDataInicial());
         locacao.setDataFinal(form.getDataFinal());
         locacao.setVeiculo(form.getVeiculo());
         locacao.setDescricao(form.getDescricao());
         locacao.setTipoVeiculo(form.getTipoVeiculo());
+        locacao.setCliente(cliente);
 
         cliente.getLocacoes().add(locacao);
+
         locacao = locacaoRepository.save(locacao);
 
         return locacao;
     }
+
     @Transactional
     public Locacao consultarLocacao(Long id) {
         return locacaoRepository.findById(id)
@@ -84,7 +86,6 @@ public class LocacaoService {
         Cliente cliente = locacao.getCliente();
 
         locacaoRepository.delete(locacao);
-        clienteRepository.save(cliente);
     }
 
     @Transactional(readOnly = true)
