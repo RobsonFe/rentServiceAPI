@@ -1,11 +1,13 @@
 package io.github.robsonfe.rentservice.service;
 
 import io.github.robsonfe.rentservice.model.Cliente;
+import io.github.robsonfe.rentservice.model.LocacaoDTO;
 import io.github.robsonfe.rentservice.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+
 import java.util.Optional;
 
 @Service
@@ -18,32 +20,19 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
-    public Cliente atualizarCliente(Long id, Cliente clienteAtualizado) {
-        Optional<Cliente> optionalCliente = clienteRepository.findById(id);
-        if (optionalCliente.isPresent()) {
-            Cliente cliente = optionalCliente.get();
-            cliente.setName(clienteAtualizado.getName());
-            cliente.setLocacaoStatus(clienteAtualizado.getLocacaoStatus());
+    @Transactional
+    public Cliente atualizar(Long id, LocacaoDTO locacaoDTO) {
+        Optional<Cliente> clienteOptional = clienteRepository.findById(id);
+
+        if (clienteOptional.isPresent()) {
+            Cliente cliente = clienteOptional.get();
+            cliente.setName(locacaoDTO.getName());
+            cliente.setLocacaoStatus(locacaoDTO.getLocacaoStatus());
             return clienteRepository.save(cliente);
         }
-        throw new IllegalArgumentException("Cliente não encontrado para atualizar");
+
+        throw new IllegalArgumentException("Locação não encontrada para atualizar!");
     }
 
-    public List<Cliente> listarClientes() {
-        return clienteRepository.findAll();
-    }
 
-    public void deletarCliente(Long id) {
-        clienteRepository.deleteById(id);
-    }
-
-    public Cliente buscarPorId(Long clienteId) {
-        clienteRepository.findById(clienteId);
-
-        return clienteRepository.findById(clienteId).get();
-    }
-
-    public void salvar(Cliente clienteExistente) {
-        clienteRepository.save(clienteExistente);
-    }
 }

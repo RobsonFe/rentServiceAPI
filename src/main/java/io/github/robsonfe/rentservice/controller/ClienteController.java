@@ -1,7 +1,7 @@
 package io.github.robsonfe.rentservice.controller;
 
 import io.github.robsonfe.rentservice.model.Cliente;
-import io.github.robsonfe.rentservice.model.Locacao;
+import io.github.robsonfe.rentservice.model.LocacaoDTO;
 import io.github.robsonfe.rentservice.repository.ClienteRepository;
 import io.github.robsonfe.rentservice.service.ClienteService;
 import io.github.robsonfe.rentservice.service.LocacaoService;
@@ -79,47 +79,17 @@ public class ClienteController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @Operation(summary = "Atualizar cliente e locação associada",
-            description = "Atualiza um cliente existente e, opcionalmente, a locação associada.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Cliente e locação atualizados com sucesso",
-                            content = @Content(mediaType = "application/json", schema = @Schema(
-                                    implementation = Cliente.class))),
-                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
-            })
+    @Operation(summary = "Alterar dados do cliente",
+            description = "Busca pelo id do cliente e altera o corpo da requisição", responses = {
+            @ApiResponse(responseCode = "200", description = "usuario atualizado com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(
+                            implementation = Cliente.class ))),
+            @ApiResponse(responseCode = "404", description = "cliente não encontrado")
+    })
     @PutMapping("/alterar/{id}")
-    public ResponseEntity<Cliente> atualizarClienteElocacao(@PathVariable("id") Long clienteId, @Valid @RequestBody Cliente clienteAtualizado) {
-
-        Cliente clienteExistente = clienteService.buscarPorId(clienteId);
-
-        if (clienteExistente == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        clienteExistente.setName(clienteAtualizado.getName());
-        clienteExistente.setLocacaoStatus(clienteAtualizado.getLocacaoStatus());
-
-        if (!clienteExistente.getLocacoes().isEmpty()) {
-
-            Locacao locacaoExistente = clienteExistente.getLocacoes().get(0);
-
-            if (clienteAtualizado.getLocacoes() != null && !clienteAtualizado.getLocacoes().isEmpty()) {
-                Locacao locacaoAtualizada = clienteAtualizado.getLocacoes().get(0);
-
-                locacaoExistente.setDataInicial(locacaoAtualizada.getDataInicial());
-                locacaoExistente.setDataFinal(locacaoAtualizada.getDataFinal());
-                locacaoExistente.setVeiculo(locacaoAtualizada.getVeiculo());
-                locacaoExistente.setDescricao(locacaoAtualizada.getDescricao());
-                locacaoExistente.setTipoVeiculo(locacaoAtualizada.getTipoVeiculo());
-
-                locacaoService.salvar(locacaoExistente); // Atualiza a locação no banco de dados
-            }
-        }
-
-        // Salva as alterações no cliente
-        clienteService.salvar(clienteExistente);
-
-        return ResponseEntity.ok(clienteExistente);
+    public ResponseEntity<Cliente> atualizar(@PathVariable Long id, @RequestBody LocacaoDTO locacaoDTO) {
+        Cliente clienteAtualizar = clienteService.atualizar(id, locacaoDTO);
+        return ResponseEntity.ok(clienteAtualizar);
     }
 
     @Operation(summary = "Deletar cliente por ID",
