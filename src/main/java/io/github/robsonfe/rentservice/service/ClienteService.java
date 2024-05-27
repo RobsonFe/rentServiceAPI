@@ -36,4 +36,14 @@ public class ClienteService {
     public void deletarCliente(Long id) {
         clienteRepository.deleteById(id);
     }
+
+    public Cliente buscarPorId(Long clienteId) {
+        clienteRepository.findById(clienteId);
+
+        return clienteRepository.findById(clienteId).get();
+    }
+
+    public void salvar(Cliente clienteExistente) {
+        clienteRepository.save(clienteExistente);
+    }
 }

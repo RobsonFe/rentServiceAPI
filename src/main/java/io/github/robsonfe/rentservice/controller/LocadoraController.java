@@ -2,7 +2,7 @@ package io.github.robsonfe.rentservice.controller;
 
 import io.github.robsonfe.rentservice.model.Cliente;
 import io.github.robsonfe.rentservice.model.Locacao;
-import io.github.robsonfe.rentservice.model.LocacaoForm;
+import io.github.robsonfe.rentservice.model.LocacaoDTO;
 import io.github.robsonfe.rentservice.repository.ClienteRepository;
 import io.github.robsonfe.rentservice.repository.LocacaoRepository;
 import io.github.robsonfe.rentservice.service.LocacaoService;
@@ -51,9 +51,9 @@ public class LocadoraController {
                             )))
             })
     @PostMapping("/cadastrar")
-    public ResponseEntity<Locacao> cadastrarLocacao(@Valid @RequestBody LocacaoForm locacaoForm) {
+    public ResponseEntity<Locacao> cadastrarLocacao(@Valid @RequestBody LocacaoDTO locacaoDTO) {
         try {
-            Locacao locacao = locacaoService.cadastrarLocacao(locacaoForm);
+            Locacao locacao = locacaoService.cadastrarLocacao(locacaoDTO);
             return ResponseEntity.ok(locacao);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
@@ -117,6 +117,20 @@ public class LocadoraController {
     @GetMapping("/buscar/nome")
     public List<Cliente> buscarPorNome(@RequestParam String nome){
         return  locacaoService.buscarPorNome(nome);
+    }
+
+    @Operation(summary = "Atualizar Locação",
+            description = "Atualiza uma locação existente com base no ID fornecido.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Locação atualizada com sucesso.",
+                            content = @Content(mediaType = "application/json", schema = @Schema(
+                                    implementation = Locacao.class))),
+                    @ApiResponse(responseCode = "404", description = "Locação não encontrada.")
+            })
+    @PatchMapping("/alterar/{id}")
+    public ResponseEntity<Locacao> alterar(@PathVariable Long id, @RequestBody LocacaoDTO locacaoDTO) {
+        Locacao locacaoAtualizada = locacaoService.atualizar(id, locacaoDTO);
+        return ResponseEntity.ok(locacaoAtualizada);
     }
 
     @Operation(summary = "Cancelar Locação",

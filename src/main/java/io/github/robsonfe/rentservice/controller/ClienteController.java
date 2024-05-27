@@ -1,12 +1,16 @@
 package io.github.robsonfe.rentservice.controller;
 
 import io.github.robsonfe.rentservice.model.Cliente;
+import io.github.robsonfe.rentservice.model.Locacao;
 import io.github.robsonfe.rentservice.repository.ClienteRepository;
+import io.github.robsonfe.rentservice.service.ClienteService;
+import io.github.robsonfe.rentservice.service.LocacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,52 +19,44 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@Tag(name = "Cliente" , description = "Recursos conforme manipulação de dados do cliente.")
+@Tag(name = "Cliente", description = "Recursos para manipulação de dados do cliente")
 @RestController
-@RequestMapping("api/v1/locacoes/clientes")
+@RequestMapping("/api/v1/locacoes/clientes")
 public class ClienteController {
 
+    private final ClienteRepository clienteRepository;
+    private final LocacaoService locacaoService;
+    private final ClienteService clienteService;
+
     @Autowired
-    private ClienteRepository clienteRepository;
+    public ClienteController(ClienteRepository clienteRepository, LocacaoService locacaoService, ClienteService clienteService) {
+        this.clienteRepository = clienteRepository;
+        this.locacaoService = locacaoService;
+        this.clienteService = clienteService;
+    }
 
     @Operation(summary = "Registrar um cliente",
-            description = "Você registra um cliente no sistema",
+            description = "Registra um cliente no sistema.",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Cadastrado com suceso!",
+                    @ApiResponse(responseCode = "201", description = "Cliente cadastrado com sucesso",
                             content = @Content(mediaType = "application/json", schema = @Schema(
-                                    implementation = ClienteController.class
-                            ))),
-                    @ApiResponse(responseCode = "204", description = "O cliente não foi encontrado",
-                            content = @Content(mediaType = "application/json", schema = @Schema(
-                                    implementation = Error.class
-                            ))),
-                    @ApiResponse(responseCode = "404", description = "Não foi encontrado nenhum registro no servidor",
-                            content = @Content(mediaType = "application/json", schema = @Schema(
-                                    implementation = Error.class
-                            )))
+                                    implementation = Cliente.class))),
+                    @ApiResponse(responseCode = "400", description = "Requisição inválida")
             })
     @PostMapping("/cadastrar")
-    public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente cliente) {
+    public ResponseEntity<Cliente> cadastrarCliente(@Valid @RequestBody Cliente cliente) {
         cliente.setLocacaoStatus(Cliente.LocacaoStatus.SEM_LOCACAO);
         Cliente novoCliente = clienteRepository.save(cliente);
         return new ResponseEntity<>(novoCliente, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Listar Todos os Clientes",
-            description = "Listagem de todos os clientes",
+    @Operation(summary = "Listar todos os clientes",
+            description = "Retorna uma lista de todos os clientes cadastrados.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Listagem Concluída!",
+                    @ApiResponse(responseCode = "200", description = "Lista de clientes retornada com sucesso",
                             content = @Content(mediaType = "application/json", schema = @Schema(
-                                    implementation = ClienteController.class
-                            ))),
-                    @ApiResponse(responseCode = "202", description = "Não possui lista a ser exibida",
-                            content = @Content(mediaType = "application/json", schema = @Schema(
-                                    implementation = Error.class
-                            ))),
-                    @ApiResponse(responseCode = "404", description = "Não foi encontrado nenhum dado no servidor.",
-                            content = @Content(mediaType = "application/json", schema = @Schema(
-                                    implementation = Error.class
-                            )))
+                                    implementation = Cliente.class))),
+                    @ApiResponse(responseCode = "404", description = "Nenhum cliente encontrado")
             })
     @GetMapping
     public ResponseEntity<List<Cliente>> listarClientes() {
@@ -68,62 +64,79 @@ public class ClienteController {
         return new ResponseEntity<>(clientes, HttpStatus.OK);
     }
 
-    @Operation(summary = "Consultar Cliente",
-            description = "Buscar por cliente conforme ID fornecido",
+    @Operation(summary = "Consultar cliente por ID",
+            description = "Busca um cliente pelo seu ID.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Busca Concluída!",
+                    @ApiResponse(responseCode = "200", description = "Cliente encontrado com sucesso",
                             content = @Content(mediaType = "application/json", schema = @Schema(
-                                    implementation = ClienteController.class
-                            ))),
-                    @ApiResponse(responseCode = "202", description = "Não possui nenhum cliente",
-                            content = @Content(mediaType = "application/json", schema = @Schema(
-                                    implementation = Error.class
-                            )))
+                                    implementation = Cliente.class))),
+                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
             })
-    @GetMapping("consultar/{id}")
+    @GetMapping("/consultar/{id}")
     public ResponseEntity<Cliente> consultarClientePorId(@PathVariable Long id) {
         Optional<Cliente> cliente = clienteRepository.findById(id);
         return cliente.map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @Operation(summary = "Atualizar Cliente",
-            description = "Atualiza um cliente existente com base no ID fornecido.",
+    @Operation(summary = "Atualizar cliente e locação associada",
+            description = "Atualiza um cliente existente e, opcionalmente, a locação associada.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso.",
+                    @ApiResponse(responseCode = "200", description = "Cliente e locação atualizados com sucesso",
                             content = @Content(mediaType = "application/json", schema = @Schema(
                                     implementation = Cliente.class))),
-                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado.")
+                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
             })
-    @PutMapping("alterar/{id}")
-    public ResponseEntity<Cliente> atualizarCliente(@PathVariable Long id, @RequestBody Cliente clienteDetalhes) {
-        Optional<Cliente> clienteAtual = clienteRepository.findById(id);
+    @PutMapping("/alterar/{id}")
+    public ResponseEntity<Cliente> atualizarClienteElocacao(@PathVariable("id") Long clienteId, @Valid @RequestBody Cliente clienteAtualizado) {
 
-        if (clienteAtual.isPresent()) {
-            Cliente cliente = clienteAtual.get();
-            cliente.setName(clienteDetalhes.getName());
-            Cliente clienteAtualizado = clienteRepository.save(cliente);
-            return ResponseEntity.ok(clienteAtualizado);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        Cliente clienteExistente = clienteService.buscarPorId(clienteId);
+
+        if (clienteExistente == null) {
+            return ResponseEntity.notFound().build();
         }
+
+        clienteExistente.setName(clienteAtualizado.getName());
+        clienteExistente.setLocacaoStatus(clienteAtualizado.getLocacaoStatus());
+
+        if (!clienteExistente.getLocacoes().isEmpty()) {
+
+            Locacao locacaoExistente = clienteExistente.getLocacoes().get(0);
+
+            if (clienteAtualizado.getLocacoes() != null && !clienteAtualizado.getLocacoes().isEmpty()) {
+                Locacao locacaoAtualizada = clienteAtualizado.getLocacoes().get(0);
+
+                locacaoExistente.setDataInicial(locacaoAtualizada.getDataInicial());
+                locacaoExistente.setDataFinal(locacaoAtualizada.getDataFinal());
+                locacaoExistente.setVeiculo(locacaoAtualizada.getVeiculo());
+                locacaoExistente.setDescricao(locacaoAtualizada.getDescricao());
+                locacaoExistente.setTipoVeiculo(locacaoAtualizada.getTipoVeiculo());
+
+                locacaoService.salvar(locacaoExistente); // Atualiza a locação no banco de dados
+            }
+        }
+
+        // Salva as alterações no cliente
+        clienteService.salvar(clienteExistente);
+
+        return ResponseEntity.ok(clienteExistente);
     }
 
-    @Operation(summary = "Deletar",
-            description = "Deleta um cliente com base no ID fornecido",
+    @Operation(summary = "Deletar cliente por ID",
+            description = "Deleta um cliente existente pelo seu ID.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Cliente excluido com sucesso!"),
-                    @ApiResponse(responseCode = "204", description = "Cliente não encontrado")
+                    @ApiResponse(responseCode = "204", description = "Cliente deletado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
             })
-    @DeleteMapping("deletar/{id}")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> deletarCliente(@PathVariable Long id) {
         Optional<Cliente> cliente = clienteRepository.findById(id);
 
         if (cliente.isPresent()) {
             clienteRepository.delete(cliente.get());
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 }

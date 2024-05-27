@@ -2,7 +2,7 @@ package io.github.robsonfe.rentservice.service;
 
 import io.github.robsonfe.rentservice.model.Cliente;
 import io.github.robsonfe.rentservice.model.Locacao;
-import io.github.robsonfe.rentservice.model.LocacaoForm;
+import io.github.robsonfe.rentservice.model.LocacaoDTO;
 import io.github.robsonfe.rentservice.repository.ClienteRepository;
 import io.github.robsonfe.rentservice.repository.LocacaoRepository;
 import jakarta.persistence.EntityManager;
@@ -32,7 +32,7 @@ public class LocacaoService {
 
 
     @Transactional
-    public Locacao cadastrarLocacao(LocacaoForm form){
+    public Locacao cadastrarLocacao(LocacaoDTO form){
 
         Cliente cliente = new Cliente();
         cliente.setName(form.getName());
@@ -61,22 +61,23 @@ public class LocacaoService {
     }
 
     @Transactional
-    public Locacao atualizar(Long id, LocacaoForm form){
-        Optional<Locacao> locacoes = locacaoRepository.findById(id);
+    public Locacao atualizar(Long id, LocacaoDTO locacaoDTO) {
+        Optional<Locacao> locacaoOptional = locacaoRepository.findById(id);
 
-        if(locacoes.isPresent()){
-            Locacao locacao = locacoes.get();
-            locacao.setDataInicial(form.getDataInicial());
-            locacao.setDataFinal(form.getDataFinal());
-            locacao.setVeiculo(form.getVeiculo());
-            locacao.setDescricao(form.getDescricao());
-            locacao.setTipoVeiculo(form.getTipoVeiculo());
+        if (locacaoOptional.isPresent()) {
+            Locacao locacao = locacaoOptional.get();
+            locacao.setDataInicial(locacaoDTO.getDataInicial());
+            locacao.setDataFinal(locacaoDTO.getDataFinal());
+            locacao.setVeiculo(locacaoDTO.getVeiculo());
+            locacao.setDescricao(locacaoDTO.getDescricao());
+            locacao.setTipoVeiculo(locacaoDTO.getTipoVeiculo());
 
             return locacaoRepository.save(locacao);
         }
 
         throw new IllegalArgumentException("Locação não encontrada para atualizar!");
     }
+
 
     @Transactional
     public void cancelarLocacao(Long id) {
@@ -94,5 +95,9 @@ public class LocacaoService {
         TypedQuery<Cliente> query = entityManager.createQuery(jpql, Cliente.class);
         query.setParameter("nome", "%" + nome + "%");
         return query.getResultList();
+    }
+
+    public void salvar(Locacao locacaoExistente) {
+        locacaoRepository.save(locacaoExistente);
     }
 }
