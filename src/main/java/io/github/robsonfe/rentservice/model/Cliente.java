@@ -15,6 +15,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "tb_cliente")
 public class Cliente implements Serializable {

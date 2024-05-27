@@ -34,21 +34,13 @@ public class LocacaoService {
     @Transactional
     public Locacao cadastrarLocacao(LocacaoForm form){
 
-        Optional<Cliente> clientes = clienteRepository.findByName(form.getNomeCliente());
-                Cliente cliente;
-
-        if(clientes.isPresent()){
-            cliente = clientes.get();
-        } else {
-            cliente = new Cliente();
-            cliente.setName(form.getNomeCliente());
-            cliente.setLocacaoStatus(form.getLocacaoStatus());
-            cliente = clienteRepository.save(cliente);
-        }
+        Cliente cliente = new Cliente();
+        cliente.setName(form.getName());
+        cliente.setLocacaoStatus(form.getLocacaoStatus());
+        cliente = clienteRepository.save(cliente);
 
         Locacao locacao = new Locacao();
 
-        locacao.setCliente(cliente);
         locacao.setDataInicial(form.getDataInicial());
         locacao.setDataFinal(form.getDataFinal());
         locacao.setVeiculo(form.getVeiculo());
@@ -57,6 +49,7 @@ public class LocacaoService {
 
         cliente.getLocacoes().add(locacao);
         locacao = locacaoRepository.save(locacao);
+
         return locacao;
     }
     @Transactional
