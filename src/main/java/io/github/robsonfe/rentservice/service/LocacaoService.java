@@ -34,6 +34,10 @@ public class LocacaoService {
     @Transactional
     public Locacao cadastrarLocacao(LocacaoDTO form){
 
+        if(form.getDataInicial().isAfter(form.getDataFinal())){
+            throw new IllegalArgumentException("A data inicial não pode ser maior do que a data final");
+        }
+
         Cliente cliente = new Cliente();
         cliente.setName(form.getName());
         cliente.setLocacaoStatus(form.getLocacaoStatus());

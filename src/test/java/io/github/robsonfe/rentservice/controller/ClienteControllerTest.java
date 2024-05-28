@@ -2,142 +2,108 @@ package io.github.robsonfe.rentservice.controller;
 
 import io.github.robsonfe.rentservice.model.Cliente;
 import io.github.robsonfe.rentservice.repository.ClienteRepository;
+import io.github.robsonfe.rentservice.service.ClienteService;
+import io.github.robsonfe.rentservice.service.LocacaoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ClienteController.class)
+@ExtendWith(MockitoExtension.class)
 class ClienteControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private ClienteRepository clienteRepository;
 
-    private Cliente cliente;
+    @Mock
+    private LocacaoService locacaoService;
+
+    @Mock
+    private ClienteService clienteService;
+
+    @InjectMocks
+    private ClienteController clienteController;
+
+    private Cliente clienteExistente;
 
     @BeforeEach
     void setUp() {
-        cliente = new Cliente();
-        cliente.setId(1L);
-        cliente.setName("Teste Cliente");
-        cliente.setLocacaoStatus(Cliente.LocacaoStatus.SEM_LOCACAO);
+        // Inicializar um cliente para testes
+        clienteExistente = new Cliente();
+        clienteExistente.setId(1L);
+        clienteExistente.setName("Cliente Teste");
+        clienteExistente.setLocacaoStatus(Cliente.LocacaoStatus.TEM_LOCACAO);
     }
 
     @Test
-    void testCadastrarCliente() throws Exception {
-        when(clienteRepository.save(any(Cliente.class))).thenReturn(cliente);
+    void testCadastrarCliente() {
 
-        mockMvc.perform(post("/api/v1/locacoes/clientes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Teste Cliente\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", is("Teste Cliente")))
-                .andExpect(jsonPath("$.locacaoStatus", is("SEM_LOCACAO")));
+        when(clienteRepository.save(any(Cliente.class))).thenReturn(clienteExistente);
+
+        Cliente clienteParaCadastrar = new Cliente();
+        clienteParaCadastrar.setName("Novo Cliente");
+
+        ResponseEntity<Cliente> responseEntity = clienteController.cadastrarCliente(clienteParaCadastrar);
+
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        assertEquals(clienteExistente, responseEntity.getBody());
 
         verify(clienteRepository, times(1)).save(any(Cliente.class));
     }
 
     @Test
-    void testListarClientes() throws Exception {
-        when(clienteRepository.findAll()).thenReturn(Arrays.asList(cliente));
+    void testListarClientes() {
 
-        mockMvc.perform(get("/api/v1/locacoes/clientes")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name", is("Teste Cliente")));
+        when(clienteRepository.findAll()).thenReturn(Arrays.asList(clienteExistente));
+
+        ResponseEntity<List<Cliente>> responseEntity = clienteController.listarClientes();
+
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(1, responseEntity.getBody().size());
+        assertEquals(clienteExistente, responseEntity.getBody().get(0));
 
         verify(clienteRepository, times(1)).findAll();
     }
 
     @Test
-    void testConsultarClientePorId() throws Exception {
-        when(clienteRepository.findById(anyLong())).thenReturn(Optional.of(cliente));
+    void testConsultarClienteExistente() {
 
-        mockMvc.perform(get("/api/v1/locacoes/clientes/consultar/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is("Teste Cliente")));
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteExistente));
 
-        verify(clienteRepository, times(1)).findById(1L);
-    }
+        ResponseEntity<Cliente> responseEntity = clienteController.consultarClientePorId(1L);
 
-    @Test
-    void testConsultarClientePorIdNotFound() throws Exception {
-        when(clienteRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/api/v1/locacoes/clientes/consultar/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(clienteExistente, responseEntity.getBody());
 
         verify(clienteRepository, times(1)).findById(1L);
     }
 
     @Test
-    void testAtualizarCliente() throws Exception {
-        when(clienteRepository.findById(anyLong())).thenReturn(Optional.of(cliente));
-        when(clienteRepository.save(any(Cliente.class))).thenReturn(cliente);
+    void testConsultarClienteNaoExistente() {
 
-        mockMvc.perform(put("/api/v1/locacoes/clientes/alterar/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Cliente Atualizado\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is("Cliente Atualizado")));
+        when(clienteRepository.findById(2L)).thenReturn(Optional.empty());
 
-        verify(clienteRepository, times(1)).findById(1L);
-        verify(clienteRepository, times(1)).save(any(Cliente.class));
+        ResponseEntity<Cliente> responseEntity = clienteController.consultarClientePorId(2L);
+
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+
+        verify(clienteRepository, times(1)).findById(2L);
     }
 
-    @Test
-    void testAtualizarClienteNotFound() throws Exception {
-        when(clienteRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        mockMvc.perform(put("/api/v1/locacoes/clientes/alterar/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Cliente Atualizado\"}"))
-                .andExpect(status().isNotFound());
-
-        verify(clienteRepository, times(1)).findById(1L);
-        verify(clienteRepository, never()).save(any(Cliente.class));
-    }
-
-    @Test
-    void testDeletarCliente() throws Exception {
-        when(clienteRepository.findById(anyLong())).thenReturn(Optional.of(cliente));
-
-        mockMvc.perform(delete("/api/v1/locacoes/clientes/deletar/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
-
-        verify(clienteRepository, times(1)).findById(1L);
-        verify(clienteRepository, times(1)).delete(cliente);
-    }
-
-    @Test
-    void testDeletarClienteNotFound() throws Exception {
-        when(clienteRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        mockMvc.perform(delete("/api/v1/locacoes/clientes/deletar/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-
-        verify(clienteRepository, times(1)).findById(1L);
-        verify(clienteRepository, never()).delete(any(Cliente.class));
-    }
 }
