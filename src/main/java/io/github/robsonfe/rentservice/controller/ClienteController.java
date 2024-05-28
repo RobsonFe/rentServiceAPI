@@ -58,7 +58,7 @@ public class ClienteController {
                                     implementation = Cliente.class))),
                     @ApiResponse(responseCode = "404", description = "Nenhum cliente encontrado")
             })
-    @GetMapping
+    @GetMapping("/listar")
     public ResponseEntity<List<Cliente>> listarClientes() {
         List<Cliente> clientes = clienteRepository.findAll();
         return new ResponseEntity<>(clientes, HttpStatus.OK);
@@ -86,10 +86,10 @@ public class ClienteController {
                             implementation = Cliente.class ))),
             @ApiResponse(responseCode = "404", description = "cliente não encontrado")
     })
-    @PutMapping("/alterar/{id}")
-    public ResponseEntity<Cliente> atualizar(@PathVariable Long id, @RequestBody LocacaoDTO locacaoDTO) {
-        Cliente clienteAtualizar = clienteService.atualizar(id, locacaoDTO);
-        return ResponseEntity.ok(clienteAtualizar);
+    @PutMapping(value = "/atualizar/{id}")
+    public ResponseEntity<Cliente> update(@PathVariable Long id, @RequestBody Cliente cliente){
+        Cliente clienteUpdate = clienteService.update(id, cliente);
+        return ResponseEntity.ok().body(clienteUpdate);
     }
 
     @Operation(summary = "Deletar cliente por ID",
